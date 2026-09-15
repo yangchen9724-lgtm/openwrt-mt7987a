@@ -1,0 +1,150 @@
+# ============================================================
+# ImmortalWrt master 编译配置 — Hiveton H5000M (MT7987A / Filogic 860)
+#
+# 适用硬件（Hiveton H5000M / Airpi H5000M 5G CPE）：
+#   SoC     : MT7987A 四核 Cortex-A53 2.4GHz
+#   WiFi7   : MT7992（PCIe 挂载，产品标称 BE5040 双频 3x3）
+#   网口    : 2 × 2.5G（eth0=外置 RTL8221B + eth1=内置 2.5G PHY）
+#   存储    : eMMC 8GB（rootfs 分区，f2fs）
+#   5G 模组 : M.2 B-Key，USB3.2 接口（鼎桥 MT5700-CN / 移远 RM520N / RM500）
+#   内存    : DDR4 1GB
+#   其他    : PWM 主动散热风扇（5G 高负载降温）
+#
+# 已集成插件：拼拼WiFi（Wiwiz）全套、巴龙哥 QModem（5G 界面）、
+#            H5000M 风扇温控 + 网络模式切换（FAN789）、PassWall2 科学上网（访问国外网络）
+# 扩展性：dnsmasq-full（完整 DNS）、tun/tproxy 内核模块、保留在线装包能力、2GB rootfs 空间
+# 设备官方支持：ImmortalWrt master 内置 hiveton_h5000m 设备配置
+# ============================================================
+
+# ---------- 目标平台 ----------
+CONFIG_TARGET_mediatek=y
+CONFIG_TARGET_mediatek_filogic=y
+# Hiveton H5000M（ImmortalWrt 官方设备，原厂即 ImmortalWrt fork，直接 sysupgrade 升级）
+CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_hiveton_h5000m=y
+
+# ---------- 镜像参数 ----------
+# eMMC 8GB，rootfs 分区给 2GB（留足安装软件的空间）
+CONFIG_TARGET_ROOTFS_PARTSIZE=2048
+# 生成 initramfs 内核（救砖/试机用：U-Boot tftp 或恢复模式引导）
+CONFIG_TARGET_ROOTFS_INITRAMFS=y
+
+# ---------- LuCI 管理界面 ----------
+CONFIG_PACKAGE_luci=y
+# 拼拼WiFi 官方教程要求使用 openssl 变体
+CONFIG_PACKAGE_luci-ssl-openssl=y
+CONFIG_PACKAGE_luci-theme-bootstrap=y
+# 拼拼WiFi 的 LuCI 页面依赖（官方教程建议项）
+CONFIG_PACKAGE_luci-compat=y
+
+# ---------- 拼拼WiFi (Wiwiz 收费WiFi平台) ----------
+# Portal 认证/收费弹窗（依赖 iptables-mod-extra/ipopt/nat-extra、curl、jsonfilter，自动带上）
+CONFIG_PACKAGE_wifidog-wiwiz=y
+# EQOS 按 IP 限速（Portal 必选，依赖 tc、kmod-sched-core、kmod-ifb，自动带上）
+CONFIG_PACKAGE_eqos=y
+CONFIG_PACKAGE_luci-app-eqos=y
+# DCC2 远程管理（无SSL变体）
+CONFIG_PACKAGE_dcc2-wiwiz-nossl=y
+# 付费到期自动断开无线用户（可选）
+CONFIG_PACKAGE_autokick-wiwiz=y
+# 添加免认证网络和防火墙配置（管理员网络免 Portal 认证，可选）
+CONFIG_NO_PORTAL=y
+# wifidog 需要的 legacy iptables（ImmortalWrt master 与 OpenWrt 25.12 同包名：
+# iptables-zz-legacy，旧文档里的 iptables-legacy / iptables-mod-iface / iptables-mod-ipmark 已改名或移除；
+# wifidog-wiwiz 自身依赖的 iptables-mod-extra/ipopt/nat-extra 会自动带上）
+CONFIG_PACKAGE_iptables-zz-legacy=y
+CONFIG_PACKAGE_ip6tables-zz-legacy=y
+CONFIG_PACKAGE_iptables-mod-conntrack-extra=y
+
+# ---------- WiFi7 驱动（MT7992，设备自动带上） ----------
+# Hiveton H5000M 的设备定义（ImmortalWrt master filogic.mk）已自动包含：
+#   kmod-mt7996e            WiFi7 驱动（官方 mt76）
+#   kmod-mt7992-23-firmware MT7992 固件（ImmortalWrt 新版包名，注意不是旧版 kmod-mt7992-firmware）
+#   mt7987-2p5g-phy-firmware 2.5G PHY 固件
+# 无需在此手动勾选；WiFi 节点写死在设备树（PCIe0 → mt7992），
+# 与 rfb 的 U-Boot overlay 机制不同，刷机不要求更换 U-Boot。
+# （如需确认，SSH 执行 dmesg | grep -i mt7996 应有驱动加载记录）
+
+# ---------- USB3 与 USB 存储 ----------
+CONFIG_PACKAGE_kmod-usb3=y
+CONFIG_PACKAGE_kmod-usb-storage=y
+CONFIG_PACKAGE_kmod-usb-storage-uas=y
+
+# ---------- 5G 模组（M.2 B-Key / USB） ----------
+# 串口 Modem
+CONFIG_PACKAGE_kmod-usb-serial=y
+CONFIG_PACKAGE_kmod-usb-serial-option=y
+CONFIG_PACKAGE_kmod-usb-serial-wwan=y
+CONFIG_PACKAGE_kmod-usb-serial-qualcomm=y
+# USB 网卡类 Modem（QMI / MBIM / NCM / RNDIS）
+CONFIG_PACKAGE_kmod-usb-net=y
+CONFIG_PACKAGE_kmod-usb-net-cdc-ether=y
+CONFIG_PACKAGE_kmod-usb-net-cdc-mbim=y
+CONFIG_PACKAGE_kmod-usb-net-cdc-ncm=y
+CONFIG_PACKAGE_kmod-usb-net-huawei-cdc-ncm=y
+CONFIG_PACKAGE_kmod-usb-net-qmi-wwan=y
+CONFIG_PACKAGE_kmod-usb-net-rndis=y
+CONFIG_PACKAGE_kmod-mii=y
+# 模式切换与拨号工具
+CONFIG_PACKAGE_usb-modeswitch=y
+CONFIG_PACKAGE_usb-modeswitch-data=y
+CONFIG_PACKAGE_comgt=y
+CONFIG_PACKAGE_chat=y
+CONFIG_PACKAGE_ppp=y
+CONFIG_PACKAGE_ppp-mod-pppoe=y
+# LuCI 拨号协议
+CONFIG_PACKAGE_luci-proto-3g=y
+CONFIG_PACKAGE_luci-proto-qmi=y
+CONFIG_PACKAGE_luci-proto-mbim=y
+CONFIG_PACKAGE_luci-proto-ncm=y
+
+# ---------- 5G 模组管理界面（巴龙哥 QModem） ----------
+# QModem（GitHub: FUjr/QModem，社区称"巴龙哥"的 5G 模组管理栈）：
+# 官方支持列表含 鼎桥 MT5700M-CN（海思平台，USB ECM/NCM）、
+# 移远 RM520N 全系 / RM500 全系（高通平台，USB QMI/MBIM/NCM/RNDIS），
+# 与你的三款模组全部匹配。以 feeds 方式集成（workflow 中追加 src-git qmodem）。
+# luci-app-qmodem-next：纯 JS 现代化界面（LuCI 菜单 Modem → QModem），
+# 支持 模组信息/信号强度/小区/拨号/锁频段锁小区/AT 下发/短信收发与转发/模组重启；
+# 其硬依赖 qmodem（核心脚本栈）、qmodem-smsd（短信服务）、sms-forwarder-next（短信转发）
+# 均由 OpenWrt 构建系统自动解析并编入固件，无需逐个手选。
+CONFIG_PACKAGE_luci-app-qmodem-next=y
+# 以下为显式列出（与上一项依赖一致，便于核对；符号名以包实际 PKG_NAME 为准）：
+CONFIG_PACKAGE_qmodem=y
+CONFIG_PACKAGE_qmodem-smsd=y
+CONFIG_PACKAGE_sms-forwarder-next=y
+# 可选组件（默认不启用；需要时改为 y 重新编译）：
+#   CONFIG_PACKAGE_luci-app-qmodem-mwan=y   多 WAN 负载均衡（5G + 宽带叠加/故障切换）
+#   CONFIG_PACKAGE_luci-app-qmodem-ttl=y    TTL 修改（用途请注意运营商规定与合规）
+# 移远 QMAP 多路拨号（RM520N 突破单路速率上限）：在 qmodem 包菜单中启用
+#   qmodem_USE_TOM_CUSTOMIZED_QUECTEL_CM（编入 quectel-CM-5G-M 拨号工具）
+
+# ---------- H5000M 专属插件（FAN789） ----------
+# 硬件 PWM 风扇温控（H5000M 有主动散热风扇，5G 高负载必备；设备定义已自带 kmod-hwmon-pwmfan）
+CONFIG_PACKAGE_luci-app-h5000m-fancontrol=y
+# 网络模式一键切换：仅5G / 仅有线宽带 / 负载均衡+故障转移（运行依赖 mwan3，自动带上）
+CONFIG_PACKAGE_luci-app-h5000m-netmode=y
+
+# ---------- 科学上网（PassWall2，访问国外网络） ----------
+# PassWall2（xiaorouji 维护，官方双 feed：passwall2 + passwall_packages，见 workflow）：
+# 支持 SS / SSR / VMess / VLESS / Trojan / Hysteria2 / NaiveProxy / Tuic / ShadowsocksR 等全协议，
+# 支持机场订阅自动更新、节点测速、分流规则（GFW/国内直连/自定义）、透明代理（tproxy/nftables）、
+# 多节点负载均衡与故障转移；核心 xray-core / sing-box 由依赖自动编入。
+CONFIG_PACKAGE_luci-app-passwall2=y
+# DNS 完整版：dnsmasq-full 替代 dnsmasq（PassWall2 分流 DNS 必需，支持 ipset/nftset/通配符）
+CONFIG_PACKAGE_dnsmasq=n
+CONFIG_PACKAGE_dnsmasq-full=y
+# 透明代理所需内核模块（tun 虚拟网卡 + nft tproxy 透明代理）
+CONFIG_PACKAGE_kmod-tun=y
+CONFIG_PACKAGE_kmod-nft-tproxy=y
+# 订阅更新/节点检测需要（PassWall2 依赖自动带上，这里显式确保）
+CONFIG_PACKAGE_curl=y
+
+# ---------- 网络硬件加速（MT7987 三层加速） ----------
+# 1) WED（无线以太网卸载引擎）：内核 CONFIG_NET_MEDIATEK_SOC_WED=y 默认启用（mtk_wed），
+#    DTS 已绑定 wed0，WiFi<->有线流量卸载到硬件，无线转发不掉速；与科学上网无冲突，保持开启；
+# 2) PPE（包处理引擎硬件流卸载）：随 mtk_eth 驱动内置，由防火墙"硬件流量分载"开关触发；
+# 3) 软件流表卸载（nft flowtable）：NAT 提速，下列包编译进固件：
+CONFIG_PACKAGE_kmod-nft-offload=y
+# 注意：硬件流量分载（flow_offloading_hw）会绕过 netfilter 用户规则，
+# 与 PassWall2 科学上网（tproxy 分流）和拼拼WiFi Portal 认证互斥，
+# 因此 workflow 的 uci-defaults 默认关闭该开关；软件分载保留 ImmortalWrt 默认。
+# 如不使用科学上网/Portal，可在 LuCI 防火墙页面手动开启硬件分载获得极限转发性能。
