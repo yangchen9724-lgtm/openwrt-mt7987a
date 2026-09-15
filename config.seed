@@ -19,10 +19,9 @@
 # ---------- 目标平台 ----------
 CONFIG_TARGET_mediatek=y
 CONFIG_TARGET_mediatek_filogic=y
-# 明确不选择"默认 Profile（全部设备）"，只编译 Hiveton H5000M 单设备镜像
-CONFIG_TARGET_mediatek_filogic_Default=n
-# Hiveton H5000M（ImmortalWrt 官方设备，原厂即 ImmortalWrt fork，直接 sysupgrade 升级）
-CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_hiveton_h5000m=y
+# ImmortalWrt master 采用 CONFIG_TARGET_PROFILE 指定单设备（subtarget DEFAULT_PROFILE 机制，
+# 若缺失会默认编译 openwrt_one 设备；旧式 CONFIG_TARGET_DEVICE_* 符号在 master 已不再生效）
+CONFIG_TARGET_PROFILE="DEVICE_hiveton_h5000m"
 
 # ---------- 镜像参数 ----------
 # eMMC 8GB，rootfs 分区给 2GB（留足安装软件的空间）
