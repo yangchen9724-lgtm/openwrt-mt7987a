@@ -117,11 +117,11 @@ jobs:
               exit 1
             fi
           done
-          # 单设备模式确认（MULTI_PROFILE/ALL_PROFILES 应为关闭）
-          if grep -q '^# CONFIG_TARGET_MULTI_PROFILE is not set' .config; then
-            echo "OK    CONFIG_TARGET_MULTI_PROFILE=n"
+          # 设备选择模式确认（MULTI_PROFILE 应为 y，DEVICE 符号才生效）
+          if grep -q '^CONFIG_TARGET_MULTI_PROFILE=y' .config; then
+            echo "OK    CONFIG_TARGET_MULTI_PROFILE=y"
           else
-            echo "MISSING  CONFIG_TARGET_MULTI_PROFILE=n"
+            echo "MISSING  CONFIG_TARGET_MULTI_PROFILE=y"
             exit 1
           fi
 

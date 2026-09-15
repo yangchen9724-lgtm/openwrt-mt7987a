@@ -19,9 +19,9 @@
 # ---------- 目标平台 ----------
 CONFIG_TARGET_mediatek=y
 CONFIG_TARGET_mediatek_filogic=y
-# 仅编译 Hiveton H5000M 单设备镜像（须同时关闭多 Profile/全部 Profile，否则 defconfig 会按
-# subtarget DEFAULT_PROFILE 强制编译 openwrt_one 设备；写法与社区 H5000M CI 一致）
-CONFIG_TARGET_MULTI_PROFILE=n
+# 设备选择：必须 MULTI_PROFILE=y 时 CONFIG_TARGET_DEVICE_* 才生效
+# （=n 时 defconfig 会按 subtarget DEFAULT_PROFILE 强制编译 openwrt_one 设备）
+CONFIG_TARGET_MULTI_PROFILE=y
 CONFIG_TARGET_ALL_PROFILES=n
 # Hiveton H5000M（ImmortalWrt 官方设备，原厂即 ImmortalWrt fork，直接 sysupgrade 升级）
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_hiveton_h5000m=y
