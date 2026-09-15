@@ -23,7 +23,7 @@
 - 拼拼WiFi（Wiwiz）开源插件仓库 **WiFiPortal 已适配 25.12 体系**；ImmortalWrt master 的 legacy iptables 包名与 25.12 一致（`iptables-zz-legacy`），组件 `wifidog-wiwiz`（Portal 认证）、`eqos`+`luci-app-eqos`（限速）、`dcc2-wiwiz-nossl`（远程管理）、`autokick-wiwiz`（到期自动断开）全部可编译；
 - 5G 模组管理界面 **巴龙哥 QModem**（GitHub `FUjr/QModem`）：以官方 feeds 方式集成（`src-git qmodem`），主界面 `luci-app-qmodem-next` 为纯 JS 现代化界面（LuCI 菜单 **Modem → QModem**），支持 模组信息/信号强度/小区/拨号设置/锁频段锁小区/AT 命令/短信收发与转发/模组重启；官方支持列表明确包含 **鼎桥 MT5700M-CN**（海思平台，USB ECM/NCM）与 **移远 RM520N 全系 / RM500 全系**（高通平台，USB QMI/MBIM/NCM/RNDIS）；配套 `qmodem-smsd`（短信服务）与 `sms-forwarder-next`（短信转发）由依赖自动带入；
 - **H5000M 专属插件（FAN789）**：`luci-app-h5000m-fancontrol`（PWM 风扇多档温控，读 CPU+模组双路温度）、`luci-app-h5000m-netmode`（仅5G/仅有线/负载均衡+故障转移一键切换，配 mwan3）；
-- **科学上网（PassWall2，访问国外网络）**：官方双 feed 集成（`passwall_packages` + `passwall2`，xiaorouji 维护），支持 SS/SSR/VMess/VLESS/Trojan/Hysteria2/NaiveProxy/Tuic 全协议 + 机场订阅自动更新 + tproxy 透明代理分流（GFW 名单/国内直连/自定义规则）；核心 xray-core / sing-box 随依赖自动编入；官方 SDK CI 每日构建验证，ImmortalWrt 兼容性有保障；
+- **科学上网（PassWall2，访问国外网络）**：官方双 feed 集成（`passwall_packages` + `passwall2`，Openwrt-Passwall 组织维护），支持 SS/SSR/VMess/VLESS/Trojan/Hysteria2/NaiveProxy/Tuic 全协议 + 机场订阅自动更新 + tproxy 透明代理分流（GFW 名单/国内直连/自定义规则）；核心 xray-core / sing-box 随依赖自动编入；官方 SDK CI 每日构建验证，ImmortalWrt 兼容性有保障；
 - **插件扩展性基础**：`dnsmasq-full`（完整 DNS，替代默认 dnsmasq，支持 ipset/nftset，科学上网与去广告类插件必需）、`kmod-tun` + `kmod-nft-tproxy`（透明代理内核模块）、保留 LuCI 在线装包能力（系统 → 软件包）、rootfs 分区 2GB（装插件空间充足）——日后想加 OpenClash、AdGuard Home、DDNS 等任何插件，直接在 LuCI 在线安装即可，无需重新编译；
 - **网络硬件加速已核实**：ImmortalWrt master（内核 6.18）`CONFIG_NET_MEDIATEK_SOC=y`、`CONFIG_NET_MEDIATEK_SOC_WED=y`（WED 默认启用），PPE 随 mtk_eth 内置；**默认关闭"硬件流量分载"开关**（科学上网 tproxy 分流与拼拼WiFi Portal 认证需要流量经过 netfilter，硬件分载会绕过导致分流失效），需要极限转发时可在 LuCI 防火墙页面手动开启。
 
@@ -131,7 +131,7 @@
 
 ## 六、科学上网（PassWall2）使用说明
 
-固件已集成 **PassWall2**（xiaorouji 维护，社区最活跃的 OpenWrt/ImmortalWrt 科学上网插件），LuCI 菜单 **服务 → PassWall2**。支持 SS / SSR / VMess / VLESS / Trojan / Hysteria2 / NaiveProxy / Tuic 全协议与机场订阅。
+固件已集成 **PassWall2**（Openwrt-Passwall 组织维护，社区最活跃的 OpenWrt/ImmortalWrt 科学上网插件），LuCI 菜单 **服务 → PassWall2**。支持 SS / SSR / VMess / VLESS / Trojan / Hysteria2 / NaiveProxy / Tuic 全协议与机场订阅。
 
 ### 1. 快速开始（以机场订阅为例）
 1. LuCI → **服务 → PassWall2** → **节点列表 → 订阅节点**；
@@ -303,6 +303,6 @@ H5000M 自带 PWM 风扇。固件已集成 `luci-app-h5000m-fancontrol`（依赖
 - 网口拓扑：eth0 = gmac0 2500base-x 外接 **RTL8221B**（phy@1）；eth1 = gmac1 internal 内置 2.5G PHY（phy@15）；2.5G PHY 固件 `mt7987-2p5g-phy-firmware` 设备自动带上
 - 拼拼WiFi 插件源码仓库：GitHub `wiwizcom/WiFiPortal`（国内备用镜像：gitee `wiwiz/WiFiPortal`）。若 Actions 中 GitHub 克隆失败，把 workflow 里对应行换成 gitee 地址即可
 - 5G 界面源码：**QModem**（github.com/FUjr/QModem，feed 名 `qmodem`）；许可证：核心 MPL 2.0 并附"禁止商业使用"条款（自用无碍，商用需联系作者），UI 包 GPLv3；若需移远 QMAP 多路加速（RM520N 突破单路速率上限），可在 qmodem 包菜单启用 `qmodem_USE_TOM_CUSTOMIZED_QUECTEL_CM`（编入 quectel-CM-5G-M 拨号工具 + 厂商 QMI 驱动），本固件默认使用官方 qmi_wwan（单路，日常足够）
-- 科学上网源码：**PassWall2**（github.com/xiaorouji/openwrt-passwall2，feed 名 `passwall2`，依赖包 feed `passwall_packages`：xray-core / sing-box / hysteria / naiveproxy / shadowsocks 全系 / chinadns-ng 等）；许可证 GPL-2.0；核心 xray-core/sing-box 为 Go 交叉编译（首次编译会多耗时约 30~60 分钟，属正常）；如需 OpenClash 可在线安装（与 PassWall2 二选一）
+- 科学上网源码：**PassWall2**（github.com/Openwrt-Passwall/openwrt-passwall2，feed 名 `passwall2`，依赖包 feed `passwall_packages`：xray-core / sing-box / hysteria / naiveproxy / shadowsocks 全系 / chinadns-ng 等）；许可证 GPL-2.0；核心 xray-core/sing-box 为 Go 交叉编译（首次编译会多耗时约 30~60 分钟，属正常）；如需 OpenClash 可在线安装（与 PassWall2 二选一）
 - H5000M 专属插件（FAN789）：`luci-app-h5000m-fancontrol`（v2.1.0，依赖 kmod-hwmon-pwmfan）、`luci-app-h5000m-netmode`（v1.3.1，配 mwan3）；另有 `luci-app-mt5700m`（MT5700M 专用界面，与本固件 QModem 功能重叠，未集成，需要可自行加）
 - 参考仓库：lianxia233/OpenWRT-CI-H5000M（鼎桥 H5000M ImmortalWrt 定制固件 CI，每日自动编译，含 README 与完整配置可对照）
