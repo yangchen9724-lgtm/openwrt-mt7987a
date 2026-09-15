@@ -59,8 +59,9 @@ jobs:
           #    qmodem 核心 + qmodem-smsd 短信服务 + sms-forwarder-next 短信转发 + driver 厂商驱动）
           echo "src-git qmodem https://github.com/FUjr/QModem.git;main" >> feeds.conf.default
           # 4) 科学上网（PassWall2）：官方两个 feed（界面 + 依赖核心包 xray/sing-box 等）
-          echo "src-git passwall_packages https://github.com/xiaorouji/openwrt-passwall-packages.git;main" >> feeds.conf.default
-          echo "src-git passwall2 https://github.com/xiaorouji/openwrt-passwall2.git;main" >> feeds.conf.default
+          #    注：PassWall 全家桶已迁移至 Openwrt-Passwall 组织（旧 xiaorouji 地址已失效）
+          echo "src-git passwall_packages https://github.com/Openwrt-Passwall/openwrt-passwall-packages.git;main" >> feeds.conf.default
+          echo "src-git passwall2 https://github.com/Openwrt-Passwall/openwrt-passwall2.git;main" >> feeds.conf.default
           cp -r ../WiFiPortal/dcc2-wiwiz package/
           cp -r ../WiFiPortal/eqos-master-wiwiz package/
           cp -r ../WiFiPortal/wifidog-wiwiz package/
