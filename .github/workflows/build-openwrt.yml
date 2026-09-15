@@ -78,13 +78,11 @@ jobs:
           #       硬件分载（flow_offloading_hw）会绕过规则导致分流失效/认证页不弹出，
           #       因此默认仅保留 ImmortalWrt 自带软件分载；需要极限转发时再手动开启。
           mkdir -p files/etc/uci-defaults
-          cat > files/etc/uci-defaults/99-enable-offload <<'EOF'
-#!/bin/sh
-# 默认关闭硬件流量分载（兼容科学上网 tproxy 分流与拼拼WiFi Portal 认证）
-uci -q set firewall.@defaults[0].flow_offloading_hw='0'
-uci commit firewall
-exit 0
-EOF
+          echo '#!/bin/sh' > files/etc/uci-defaults/99-enable-offload
+          echo '# 默认关闭硬件流量分载（兼容科学上网 tproxy 分流与拼拼WiFi Portal 认证）' >> files/etc/uci-defaults/99-enable-offload
+          echo "uci -q set firewall.@defaults[0].flow_offloading_hw='0'" >> files/etc/uci-defaults/99-enable-offload
+          echo 'uci commit firewall' >> files/etc/uci-defaults/99-enable-offload
+          echo 'exit 0' >> files/etc/uci-defaults/99-enable-offload
           chmod +x files/etc/uci-defaults/99-enable-offload
           cp ../config.seed .config
           make defconfig
