@@ -19,6 +19,8 @@
 # ---------- 目标平台 ----------
 CONFIG_TARGET_mediatek=y
 CONFIG_TARGET_mediatek_filogic=y
+# 明确不选择"默认 Profile（全部设备）"，只编译 Hiveton H5000M 单设备镜像
+CONFIG_TARGET_mediatek_filogic_Default=n
 # Hiveton H5000M（ImmortalWrt 官方设备，原厂即 ImmortalWrt fork，直接 sysupgrade 升级）
 CONFIG_TARGET_DEVICE_mediatek_filogic_DEVICE_hiveton_h5000m=y
 
@@ -124,7 +126,7 @@ CONFIG_PACKAGE_luci-app-h5000m-fancontrol=y
 CONFIG_PACKAGE_luci-app-h5000m-netmode=y
 
 # ---------- 科学上网（PassWall2，访问国外网络） ----------
-# PassWall2（xiaorouji 维护，官方双 feed：passwall2 + passwall_packages，见 workflow）：
+# PassWall2（Openwrt-Passwall 组织维护，官方双 feed：passwall2 + passwall_packages，见 workflow）：
 # 支持 SS / SSR / VMess / VLESS / Trojan / Hysteria2 / NaiveProxy / Tuic / ShadowsocksR 等全协议，
 # 支持机场订阅自动更新、节点测速、分流规则（GFW/国内直连/自定义）、透明代理（tproxy/nftables）、
 # 多节点负载均衡与故障转移；核心 xray-core / sing-box 由依赖自动编入。
