@@ -87,6 +87,14 @@ jobs:
           chmod +x files/etc/uci-defaults/99-enable-offload
           cp ../config.seed .config
           make defconfig
+          echo "===== TARGET 配置段（defconfig 后） ====="
+          grep -E 'CONFIG_TARGET_(mediatek|.*_Default|.*DEVICE_)' .config || true
+          # 强制确保仅编译 H5000M 单设备（防止被默认 Profile 归一化）
+          ./scripts/config --file .config --disable TARGET_mediatek_filogic_Default
+          ./scripts/config --file .config --enable TARGET_DEVICE_mediatek_filogic_DEVICE_hiveton_h5000m
+          make defconfig
+          echo "===== TARGET 配置段（强制设置后） ====="
+          grep -E 'CONFIG_TARGET_(mediatek|.*_Default|.*DEVICE_)' .config || true
           echo "===== 关键配置校验（缺一项即中止） ====="
           for sym in \
             CONFIG_TARGET_mediatek_filogic \
